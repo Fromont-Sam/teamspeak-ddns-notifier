@@ -6,8 +6,7 @@ public enum Reason
   RESTART_SERVER(101,"Redémarrage manuel du serveur."),
   PROXIMUS_DYNAMIC_IP(102,"Proximus a modifié de manière dynamique l'IP du serveur."),
   POWER_OUTRAGE(103,"Panne de courant, le serveur a du se relancer et l'ip a reset."),
-  LOST_CONNECTION(104,"Perte de connexion au internet."),
-  UNKNOWN_REASON(105,"Inconnue");
+  LOST_CONNECTION(104,"Perte de connexion au internet.");
 
   /**
    * Reason code

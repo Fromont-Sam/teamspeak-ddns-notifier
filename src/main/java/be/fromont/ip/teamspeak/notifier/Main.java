@@ -1,62 +1,90 @@
 package be.fromont.ip.teamspeak.notifier;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+@SuppressWarnings({"squid:S2142"})
 public class Main
   {
 
-  private static final Integer WAITING_TIME = 300000;
+  private static final Logger LOG = LogManager.getLogger(Main.class);
+
+  private static final Integer WAITING_TIME = 30000;
 
   private static String ipAdress = "";
-  private static String newIpAdress = null;
-  private static Reason reason = Reason.UNKNOWN_REASON;
+  private static Reason reason = Reason.PROXIMUS_DYNAMIC_IP;
 
   /**
-   * Main process
+   * Main process that manage all unexpected cases
    *
-   * @param args
+   * @param args the arguments provided while launching the process
+   */
+  public static void main(String[] args)
+    {
+    try
+      {
+      start(args);
+      }
+    catch(InterruptedException e)
+      {
+      LOG.error("An error occurred while waiting the next IP scan", e);
+      System.exit(-1);
+      }
+    catch(IOException e)
+      {
+      LOG.error("An error occurred while scanning the public IP", e);
+      System.exit(-1);
+      }
+    }
+
+  /**
+   * Logical process that manage all expected cases
+   *
+   * @param args the arguments provided while launching the process
+   * @throws InterruptedException
    * @throws IOException
    */
-  public static void main(String[] args) throws IOException
+  private static void start(String[] args) throws InterruptedException, IOException
     {
     //init
     Engine engine = Engine.getInstance();
-    if(args.length>=1 && args[0].toUpperCase().equals("RESTART"))
+    String newIpAdress;
+
+    //Launch args
+    if(args.length>=1 && args[0].equalsIgnoreCase("RESTART"))
       {
       reason = Reason.RESTART_SERVER;
       }
-
-    //start scanning ip thread
-    Thread t = new Thread(() ->
+    else
       {
-      while(true)
+      reason = Reason.POWER_OUTRAGE;
+      }
+
+    while(true)
+      {
+      try
         {
-        try
+        //get ip
+        newIpAdress = engine.getPublicIp();
+        if(!ipAdress.equals(newIpAdress))
           {
-          //get ip
-          newIpAdress = engine.getPublicIp();
-          if(!ipAdress.equals(newIpAdress))
-            {
-            ipAdress = newIpAdress;
-//            engine.sendToFacebook(generateMessage());
-            System.out.println(generateMessage());
-            }
-          Thread.sleep(WAITING_TIME);
-          }
-        catch (InterruptedException e)
-          {
-          System.out.println("InterruptedException");
-          e.printStackTrace();
-          }
-        catch (UnknownHostException e)
-          {
-          System.out.println("UnknownHostException");
-          e.printStackTrace();
+          LOG.info("A new IP has been found {}", newIpAdress);
+          ipAdress = newIpAdress;
+          engine.sendToFacebook(generateMessage());
           }
         }
-      });
-    t.start();
+      catch (UnknownHostException e)
+        {
+        reason = Reason.LOST_CONNECTION;
+        }
+      finally
+        {
+        Thread.sleep(WAITING_TIME);
+        }
+      }
     }
 
   /**
@@ -66,13 +94,13 @@ public class Main
    */
   private static String generateMessage()
     {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Nouvelle adresse IP teamspeak : ");
+    StringBuilder sb = new StringBuilder("Nouvelle adresse IP teamspeak : ");
     sb.append(ipAdress);
     sb.append("\n");
     sb.append("\n");
     sb.append("Raison : ");
     sb.append(reason.getReasonDescription());
+    reason = Reason.PROXIMUS_DYNAMIC_IP;
     return sb.toString();
     }
   }

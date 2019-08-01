@@ -4,6 +4,8 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.types.GraphResponse;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,10 +15,14 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
+@SuppressWarnings({"squid:CallToDeprecatedMethod"})
 public class Engine
   {
 
+  private static final Logger LOG = LogManager.getLogger(Engine.class);
+
   private static Engine instance;
+  private static final String IP_URL = "http://bot.whatismyipaddress.com";
 
   private String accessToken;
   private String groupId;
@@ -53,7 +59,8 @@ public class Engine
   public void sendToFacebook(String message)
     {
     FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
-    GraphResponse response = facebookClient.publish(groupId + "/feed", GraphResponse.class, Parameter.with("message", message));
+    facebookClient.publish(groupId + "/feed", GraphResponse.class, Parameter.with("message", message));
+    LOG.info("New IP address successfully sent to the Facebook group");
     }
 
   /**
@@ -62,22 +69,13 @@ public class Engine
    * @return the public IP adress
    * @throws UnknownHostException
    */
-  public String getPublicIp() throws UnknownHostException
+  public String getPublicIp() throws IOException
     {
     String ip;
-    try
+    try(BufferedReader sc = new BufferedReader(new InputStreamReader(new URL(IP_URL).openStream())))
       {
-      URL url_name = new URL("http://bot.whatismyipaddress.com");
-
-      BufferedReader sc =
-          new BufferedReader(new InputStreamReader(url_name.openStream()));
-
       // reads system IPAddress
       ip = sc.readLine().trim();
-      }
-    catch (Exception e)
-      {
-      ip = "Cannot Execute Properly";
       }
     return ip;
     }
