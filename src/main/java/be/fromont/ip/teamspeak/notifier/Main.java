@@ -12,7 +12,7 @@ public class Main
 
   private static final Logger LOG = LogManager.getLogger(Main.class);
 
-  private static final Integer WAITING_TIME = 30000;
+  private static final Integer WAITING_TIME = 420000;
 
   private static String ipAdress = "";
   private static Reason reason = Reason.PROXIMUS_DYNAMIC_IP;
