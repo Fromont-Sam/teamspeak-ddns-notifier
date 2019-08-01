@@ -1,33 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
-  <Appenders>
-    <Console name="screen" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} | %-6p: [%-15t] %c{1}.%M(%5L) | %m%n"/>
-    </Console>
-    <RollingFile name="dailyLogFile" fileName="./${project.application.release.name}.log"
-                 filePattern="${project.application.release.name}.%d{yyyyMMdd}.log.gz"
-                 ignoreExceptions="false"
-                 bufferedIO="true"
-                 immediateFlush="true">
-      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} | %-6p: [%-15t] %c{1}.%M(%5L) | %m%n"/>
-      <TimeBasedTriggeringPolicy />
-    </RollingFile>
-    <RollingFile name="errorFile" fileName="./${project.application.release.name}.err"
-                 filePattern="${project.application.release.name}.%d{yyyyMMdd}.err.gz"
-                 ignoreExceptions="false"
-                 bufferedIO="true"
-                 immediateFlush="true">
-      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} | %-6p: [%-15t] %c{1}.%M(%5L) | %m%n"/>
-      <TimeBasedTriggeringPolicy />
-    </RollingFile>
-  </Appenders>
-  <Loggers>
-    <Logger name="be.speos" level="debug">
-      <AppenderRef ref="dailyLogFile" level="all"/>
-      <AppenderRef ref="errorFile" level="error"/>
-    </Logger>
-    <Root level="info">
-      <AppenderRef ref="screen" level="all"/>
-    </Root>
-  </Loggers>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="all">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
 </Configuration>

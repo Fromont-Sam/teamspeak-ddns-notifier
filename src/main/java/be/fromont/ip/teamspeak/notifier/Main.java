@@ -26,6 +26,7 @@ public class Main
     {
     try
       {
+      LOG.info("Starting the process");
       start(args);
       }
     catch(InterruptedException e)
