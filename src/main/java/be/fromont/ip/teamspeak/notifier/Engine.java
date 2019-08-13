@@ -57,8 +57,8 @@ public class Engine
    */
   public void sendToFacebook(String message)
     {
-    FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
-    facebookClient.publish(groupId + "/feed", GraphResponse.class, Parameter.with("message", message));
+    //FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
+    //facebookClient.publish(groupId + "/feed", GraphResponse.class, Parameter.with("message", message));
     LOG.info("New IP address successfully sent to the Facebook group");
     }
 
@@ -79,6 +79,33 @@ public class Engine
     // reads system IPAddress
     ip = sc.readLine().trim();
     return ip;
+    }
+
+    /**
+     * Transform a ip adress to fill it with zero
+     *
+     * @param ipAdress the ip adress to transform
+     * @return the ip address filled with zero
+     */
+    public String addZeroToIp(String ipAdress)
+    {
+      try
+      {
+        String[] parts = ipAdress.split("\\.");
+        StringBuilder res = new StringBuilder();
+        for(String part : parts)
+        {
+          res.append(String.format("%02d", Integer.parseInt(part)));
+          res.append(".");
+        }
+        res.deleteCharAt(res.length()-1);
+        return res.toString();
+      }
+      catch(Exception e)
+      {
+        LOG.error("An error occurred while trying to fill IP adress with zero", e);
+        return null;
+      }
     }
 
   }

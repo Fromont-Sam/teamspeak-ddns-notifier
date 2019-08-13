@@ -74,6 +74,7 @@ public class Main
           {
           LOG.info("A new IP has been found {}", newIpAdress);
           ipAdress = newIpAdress;
+          LOG.info("Modified {}", engine.addZeroToIp(newIpAdress));
           engine.sendToFacebook(generateMessage());
           }
         }
