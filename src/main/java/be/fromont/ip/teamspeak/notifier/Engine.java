@@ -58,6 +58,7 @@ public class Engine
   public void sendToFacebook(String message)
     {
     FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
+    LOG.info(message);
     facebookClient.publish(groupId + "/feed", GraphResponse.class, Parameter.with("message", message));
     LOG.info("New IP address successfully sent to the Facebook group");
     }
@@ -78,7 +79,7 @@ public class Engine
 
     // reads system IPAddress
     ip = sc.readLine().trim();
-    return ip;
+    return addZeroToIp(ip);
     }
 
     /**

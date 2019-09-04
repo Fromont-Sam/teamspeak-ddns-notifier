@@ -73,7 +73,7 @@ public class Main
         if(!ipAdress.equals(newIpAdress))
           {
           LOG.info("A new IP has been found {}", newIpAdress);
-          ipAdress = engine.addZeroToIp(newIpAdress);
+          ipAdress = newIpAdress;
           engine.sendToFacebook(generateMessage());
           }
         }
