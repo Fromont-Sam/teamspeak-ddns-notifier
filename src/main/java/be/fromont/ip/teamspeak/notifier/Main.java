@@ -15,7 +15,6 @@ public class Main
   private static final Integer WAITING_TIME = 420000;
 
   private static String ipAdress = "";
-  private static Reason reason = Reason.PROXIMUS_DYNAMIC_IP;
 
   /**
    * Main process that manage all unexpected cases
@@ -48,21 +47,10 @@ public class Main
    * @throws InterruptedException
    * @throws IOException
    */
-  private static void start(String[] args) throws InterruptedException, IOException
-    {
+  private static void start(String[] args) throws IOException, InterruptedException {
     //init
     Engine engine = Engine.getInstance();
     String newIpAdress;
-
-    //Launch args
-    if(args.length>=1 && args[0].equalsIgnoreCase("RESTART"))
-      {
-      reason = Reason.RESTART_SERVER;
-      }
-    else
-      {
-      reason = Reason.POWER_OUTRAGE;
-      }
 
     while(true)
       {
@@ -70,38 +58,25 @@ public class Main
         {
         //get ip
         newIpAdress = engine.getPublicIp();
-        if(!ipAdress.equals(newIpAdress))
+        if(newIpAdress!= null && !ipAdress.equals(newIpAdress))
           {
           LOG.info("A new IP has been found {}", newIpAdress);
           ipAdress = newIpAdress;
-          engine.sendToFacebook(generateMessage());
+          engine.sendToDynu(ipAdress);
           }
         }
       catch (UnknownHostException e)
         {
-        reason = Reason.LOST_CONNECTION;
+        LOG.error("Connection lost", e);
+        }
+        catch (IOException e)
+        {
+        LOG.error("An error occurred", e);
         }
       finally
         {
         Thread.sleep(WAITING_TIME);
         }
       }
-    }
-
-  /**
-   * Generate the message to send to the facebook group
-   *
-   * @return the message to send
-   */
-  private static String generateMessage()
-    {
-    StringBuilder sb = new StringBuilder("Nouvelle adresse IP teamspeak : ");
-    sb.append(ipAdress);
-    sb.append("\n");
-    sb.append("\n");
-    sb.append("Raison : ");
-    sb.append(reason.getReasonDescription());
-    reason = Reason.PROXIMUS_DYNAMIC_IP;
-    return sb.toString();
     }
   }

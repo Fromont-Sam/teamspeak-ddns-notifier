@@ -1,9 +1,5 @@
 package be.fromont.ip.teamspeak.notifier;
 
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.Parameter;
-import com.restfb.types.GraphResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -23,13 +20,13 @@ public class Engine
 
   private static Engine instance;
 
-  private String accessToken;
-  private String groupId;
+  private String username;
+  private String password;
 
-  private Engine(String accessToken, String groupId)
+  private Engine(String username, String password)
     {
-    this.accessToken = accessToken;
-    this.groupId = groupId;
+    this.username = username;
+    this.password = password;
     }
 
   /**
@@ -45,22 +42,51 @@ public class Engine
       Properties authProp = new Properties();
       InputStream input = Engine.class.getClassLoader().getResourceAsStream("auth.properties");
       authProp.load(input);
-      String accessToken = authProp.getProperty("accessToken");
-      String groupId = authProp.getProperty("groupId");
-      instance = new Engine(accessToken, groupId);
+      String username = authProp.getProperty("username");
+      String password = authProp.getProperty("password");
+      instance = new Engine(username, password);
       }
     return instance;
     }
 
   /**
-   * Generate the message sending request and send it
+   * Update DNS IP
+   *
+   * @param ip
+   * @throws IOException
    */
-  public void sendToFacebook(String message)
+  public void sendToDynu(String ip) throws IOException
     {
-    FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
-    LOG.info(message);
-    facebookClient.publish(groupId + "/feed", GraphResponse.class, Parameter.with("message", message));
-    LOG.info("New IP address successfully sent to the Facebook group");
+    LOG.info("Try to send to dynu the new ip...");
+    String url = "http://api.dynu.com/nic/update?myip=" + ip + "&username=" + username + "&password=" + password;
+    HttpURLConnection con = null;
+
+    try
+      {
+      URL myurl = new URL(url);
+      con = (HttpURLConnection) myurl.openConnection();
+      con.setRequestMethod("GET");
+
+      StringBuilder content;
+
+      try (BufferedReader in = new BufferedReader(
+          new InputStreamReader(con.getInputStream())))
+        {
+        String line;
+        content = new StringBuilder();
+        while ((line = in.readLine()) != null)
+          {
+          content.append(line);
+          content.append(System.lineSeparator());
+          }
+        }
+      LOG.info("Response : " + content.toString());
+
+      }
+    finally
+      {
+      con.disconnect();
+      }
     }
 
   /**
